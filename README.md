@@ -27,7 +27,7 @@ Author: Andrea Riley(Thiel)
 5. Create a menu-driven application.
 
 - Give the user a list of automation tasks (1-4) and let them choose one to execute. Customize your application by incorporating an additional automation task, choose one:
-  - Counting the number of specific file types in a directory.
+  - Counting the number of specific file types in a directory. *completed 02-01-2024 11:25PM EST*
   - Renaming files based on a specific pattern.
   - Automatically backing up specific folders.
 
