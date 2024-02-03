@@ -161,13 +161,8 @@ def management_menu():
             folder_name = Prompt.ask('Enter the name of the new folder:')
             create_folder(folder_name)
         elif choice == '2':
-            action = Prompt.ask('Choose an action', choices=['Sort documents', 'Move deleted user'])
-            if action == 'Sort documents':
-                directory = Prompt.ask('Enter directory to sort documents')
-                move_specific_files(source_folder)
-            elif action == 'Move deleted user':
-                user_folder = Prompt.ask('Enter the path to the deleted user"s folder:')
-                handle_deleted_user(user_folder)
+            user_folder = Prompt.ask('Enter the folder to be deleted.')
+            handle_deleted_user(user_folder)
         elif choice == '3':
             source_folder = Prompt.ask('Enter the folder of the files to be sorted')
             sort_specific_files(source_folder)
