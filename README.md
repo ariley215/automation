@@ -22,7 +22,7 @@ Author: Andrea Riley(Thiel)
 
 - From the previous task, you’ve moved a log file into the logs folder. Now, parse the log file for errors and warnings and create two separate log files in a target directory:
   - errors.log: Contains all error messages.
-  - warnings.log: Contains all warning messages. 
+  - warnings.log: Contains all warning messages.
 
 1. Create a menu-driven application.*completed 02-01-2024 11:25PM EST*
 

@@ -77,6 +77,9 @@ def create_folder(folder_name):
 
 def handle_deleted_user(user_folder):
     """Moves a deleted user's documents to a temporary folder."""
+    if not os.path.exists(user_folder):
+      print(f'Error: User folder {user_folder} does not exist')
+      return
     
     temp_folder = "deleted_user_docs"
     os.makedirs(temp_folder, exist_ok=True)
@@ -84,14 +87,6 @@ def handle_deleted_user(user_folder):
         shutil.move(os.path.join(user_folder, filename),temp_folder)
     console.print(f'User documents moved to {temp_folder}')    
 
-def sort_documents(directory):
-    """Sorts documents into folders based on their extension."""
-    for root, _ , files in os.walk(directory):
-        for file in files:
-            extension = os.path.splitext(file)[1].lower()
-            target_folder = os.path.join(root, extension.replace(".", ""))
-            os.makedirs(target_folder, exist_ok=True)
-            shutil.move(os.path.join(root, file), os.path.join(target_folder, file))
 
 def parse_log_file(log_file, target_directory):
     """Parses a log file for errors and warnings, creating separate files."""
@@ -109,81 +104,85 @@ def parse_log_file(log_file, target_directory):
     with open(os.path.join(target_directory, "warnings.log"), "w") as warning_file:
         warning_file.writelines(warnings)
 
-def move_specific_files(file_type, directory, target_folder):
-    for root, _, files in os.walk(directory):
-      for file in files:
-        extension = os.path.splitext(file)[1].lower()
-        if extension == file_type:
-          source_path = os.path.join(root, file)
-          target_path = os.path.join(target_folder, file)
-          try:
-              os.makedirs(target_folder, exist_ok=True)
-              shutil.move(source_path, target_path)
-          except Exception as e:
-            console.print(f'Error moving {file}: {e}')
+def sort_specific_files(source_folder):
+  """Sorts documents into folders based on their extension."""
+  for file_name in os.listdir(source_folder):
+        file_path = os.path.join(source_folder, file_name)
+        if os.path.isfile(file_path):
+          file_extension = os.path.splitext(file_name)[1].lower()
+          
+          if file_extension == '.log':
+            destination_folder = 'logs'
+          elif file_extension in ['.eml', '.msg', '.pst']:
+            destination_folder = 'mail'
+          else:
+            continue
+          
+          destination_path = os.path.join(source_folder, destination_folder)
+          os.mkdir(destination_path, exist_ok=True)
+          shutil.move(file_path, destination_path)
 
-def main():
-    print("Inside main() function")
-    while True:
-        console.print("\n1. [orange]List[/orange] files\n2. Move file\n3. Search files\n4. Exit")
-        choice = Prompt.ask("Choose a task (Enter the number)", choices=['1', '2', '3', '4'], default='4')
+# def main():
+#     print("Inside main() function")
+#     while True:
+#       console.print("\n1. [orange]List[/orange] files\n2. Move file\n3. Search files\n4. Exit")
+#       print("Before prompt")
+#       choice = Prompt.ask("Choose a task (Enter the number)", choices=['1', '2', '3', '4'], default='4')
+#       print(f"User chose: {choice}")
 
-        if choice == "1":
-            directory = Prompt.ask("Enter the directory to list the files")
-            list_files(directory)
-        elif choice == "2":
-            current_directory = Prompt.ask("Enter the {current_directory} of the file")
-            file = Prompt.ask("Enter {file} to move")
-            target_directory = Prompt.ask("Enter the {target_directory} to move the file to")
-            move_file(current_directory, file, target_directory)
-        elif choice == "3":
-            directory = Prompt.ask("Enter directory to search files")
-            pattern = Prompt.ask("Enter the regex pattern to search for")
-            search_files(directory, pattern)
-        elif choice == "4":
-            directory = Prompt.ask("Enter the directory path for the files you'd like to count")
-            target_extensions = Prompt.ask("Enter comma-separated file extensions to count (e.g., .txt,.pdf)")
-            file_counts = count_files(directory, target_extensions.split(","))
-            print_file_counts(file_counts)
-        else:
-            break
+#       if choice == "1":
+#               directory = Prompt.ask("Enter the directory to list the files")
+#               list_files(directory)
+#       elif choice == "2":
+#               current_directory = Prompt.ask("Enter the {current_directory} of the file")
+#               file = Prompt.ask("Enter {file} to move")
+#               target_directory = Prompt.ask("Enter the {target_directory} to move the file to")
+#               move_file(current_directory, file, target_directory)
+#       elif choice == "3":
+#               directory = Prompt.ask("Enter directory to search files")
+#               pattern = Prompt.ask("Enter the regex pattern to search for")
+#               search_files(directory, pattern)
+
+#       else:
+#           break
 
 def management_menu():
-    print("Inside management_menu() function")
     while True:
         console.print('\n**Management Menu**')
         console.print('1. Create Folder')
         console.print('2. Manage user documents')
         console.print('3. Move specific file types')
-        console.print('4. Parse log file for errors and warnings')      
-        console.print('5. Exit')
+        console.print('4. Parse log file for errors and warnings')
+        console.print('5. Count the number of files in the directory')      
+        console.print('6. Exit')
         choice = Prompt.ask("Choose a task (Enter the number)", choices = ['1', '2', '3', '4', '5'], default='5')
-        
+
         if choice == '1':
-          folder_name = Prompt.ask('Enter the name of the new folder:')
-          create_folder(folder_name)
+            folder_name = Prompt.ask('Enter the name of the new folder:')
+            create_folder(folder_name)
         elif choice == '2':
-          action = Prompt.ask('Choose and action', choices=['Sort documents', 'Move deleted user'])
-          if action == 'Sort documents':
-              directory = Prompt.ask('Enter directory to sort documents')
-              sort_documents(directory)
-          elif action == 'Move deleted user documents':
-              user_folder = Prompt.ask('Enter the path to the deleted user"s folder:')
-              handle_deleted_user(user_folder)
+            action = Prompt.ask('Choose an action', choices=['Sort documents', 'Move deleted user'])
+            if action == 'Sort documents':
+                directory = Prompt.ask('Enter directory to sort documents')
+                move_specific_files(source_folder)
+            elif action == 'Move deleted user':
+                user_folder = Prompt.ask('Enter the path to the deleted user"s folder:')
+                handle_deleted_user(user_folder)
         elif choice == '3':
-            file_type = Prompt.ask('Enter the file type (e.g., .log, .txt)')
-            target_folder = Prompt.ask('Enter the target folder to move files to')
-            directory = Prompt.ask('Enter the directory to search the files')
-            move_specific_files(file_type, directory, target_folder)
+            source_folder = Prompt.ask('Enter the folder of the files to be sorted')
+            sort_specific_files(source_folder)
         elif choice == '4':
             log_file = Prompt.ask('Enter the path to the log pile to parse') 
             target_directory = Prompt.ask('Enter the target directory for the parsed logs:')
             parse_log_file(log_file, target_directory)
-        elif choice == '5':
+        elif choice == "5":
+            directory = Prompt.ask("Enter the directory path for the files you'd like to count")
+            target_extensions = Prompt.ask("Enter comma-separated file extensions to count (e.g., .txt,.pdf)")
+            file_counts = count_files(directory, target_extensions.split(","))
+            print_file_counts(file_counts)
+        elif choice == '6':
             break                 
 
 
-if __name__ == "__main":
-  
-  main()  
-  management_menu()  
+if __name__ == "__main__":
+    management_menu()
